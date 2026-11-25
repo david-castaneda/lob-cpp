@@ -1,0 +1,35 @@
+[tools]
+cmake = "latest"
+ninja = "latest"
+
+[env]
+# Uncomment to pin a specific compiler (it has to be installed on your system)
+# CXX = "g++-14"
+
+[tasks.configure]
+description = "Configure a Debug build with CMake"
+run = "cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug"
+sources = ["CMakeLists.txt"]
+outputs = ["build/CMakeCache.txt"]
+
+[tasks.build]
+description = "Compile"
+depends = ["configure"]
+run = "cmake --build build"
+
+[tasks.start]
+description = "Build and run"
+depends = ["build"]
+run = "./build/lob"
+
+[tasks.asan]
+description = "Build and run with Address/UB sanitizers"
+run = [
+  "cmake -S . -B build-asan -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer'",
+  "cmake --build build-asan",
+  "./build-asan/lob",
+]
+
+[tasks.clean]
+description = "Delete build directories"
+run = "rm -rf build build-asan"
